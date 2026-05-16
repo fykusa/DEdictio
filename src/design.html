@@ -1,0 +1,377 @@
+
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>LexiFlip — Učení slovíček</title>
+  <meta name="theme-color" content="#0F1117" />
+  <style>
+    :root {
+      --bg:          #0F1117;
+      --surface:     #181C27;
+      --surface-2:   #202535;
+      --surface-3:   #252A3A;
+      --fg:          #F0F2F8;
+      --fg-2:        #BEC4D8;
+      --muted:       #717A96;
+      --meta:        #4D5570;
+      --accent:      oklch(72% 0.19 162);
+      --accent-dim:  oklch(72% 0.19 162 / 0.15);
+      --accent-glow: oklch(72% 0.19 162 / 0.25);
+      --correct:     oklch(68% 0.18 145);
+      --correct-dim: oklch(68% 0.18 145 / 0.15);
+      --wrong:       oklch(62% 0.22 25);
+      --wrong-dim:   oklch(62% 0.22 25 / 0.15);
+      --border:      rgba(255,255,255,0.08);
+      --border-mid:  rgba(255,255,255,0.13);
+      --font: "Inter", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --r-sm: 10px; --r-md: 16px; --r-lg: 22px; --r-xl: 28px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--fg); -webkit-font-smoothing: antialiased; overflow: hidden; }
+    .shell { display: flex; justify-content: center; align-items: center; min-height: 100dvh; background: var(--bg); }
+    .phone { width: min(430px, 100vw); height: min(932px, 100dvh); background: var(--bg); display: flex; flex-direction: column; position: relative; overflow: hidden; }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 6px; font-size: 12px; font-weight: 600; color: var(--fg-2); flex-shrink: 0; }
+    .status-bar-icons { display: flex; gap: 6px; align-items: center; }
+    .status-bar-icons svg { width: 16px; height: 16px; fill: var(--fg-2); }
+    .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 12px; flex-shrink: 0; }
+    .lang-pair { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 6px 14px 6px 8px; cursor: pointer; user-select: none; transition: background 200ms var(--ease); }
+    .lang-pair:active { background: var(--surface-2); }
+    .lang-flag { font-size: 20px; line-height: 1; display: flex; align-items: center; }
+    .lang-labels { display: flex; flex-direction: column; }
+    .lang-source { font-size: 11px; color: var(--muted); line-height: 1.2; }
+    .lang-target { font-size: 13px; font-weight: 600; color: var(--fg); line-height: 1.2; }
+    .streak-badge { display: flex; align-items: center; gap: 5px; background: var(--surface); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 7px 12px; font-size: 13px; font-weight: 700; color: oklch(80% 0.18 55); }
+    .progress-area { padding: 0 20px 16px; flex-shrink: 0; }
+    .progress-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .progress-label { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .progress-score { font-size: 12px; font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; }
+    .progress-track { height: 4px; background: var(--surface-2); border-radius: 99px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 400ms var(--ease); box-shadow: 0 0 10px var(--accent-glow); }
+    .card-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 20px 16px; min-height: 0; }
+    .word-card { width: 100%; background: var(--surface); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 32px 28px; text-align: center; position: relative; overflow: hidden; }
+    .word-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, var(--accent-glow) 0%, transparent 70%); pointer-events: none; }
+    .word-category { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; font-weight: 600; margin-bottom: 16px; }
+    .word-main { font-size: clamp(38px, 10vw, 52px); font-weight: 700; color: var(--fg); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 12px; }
+    .word-phonetic { font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 20px; min-height: 0; }
+    .word-example { font-size: 13px; color: var(--fg-2); line-height: 1.55; background: var(--surface-2); border-radius: var(--r-sm); padding: 10px 14px; }
+    .word-example em { font-style: normal; color: var(--accent); }
+    @keyframes cardFlipOut { 0% { opacity:1; transform:scale(1) translateY(0); } 100% { opacity:0; transform:scale(0.94) translateY(-12px); } }
+    @keyframes cardFlipIn  { 0% { opacity:0; transform:scale(0.94) translateY(16px); } 100% { opacity:1; transform:scale(1) translateY(0); } }
+    .word-card.flip-out { animation: cardFlipOut 220ms var(--ease) forwards; }
+    .word-card.flip-in  { animation: cardFlipIn  260ms var(--ease) forwards; }
+    .answers-area { padding: 0 20px; flex-shrink: 0; }
+    .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .answer-btn { background: var(--surface); border: 1.5px solid var(--border-mid); border-radius: var(--r-lg); padding: 16px 12px; font-family: inherit; font-size: 15px; font-weight: 600; color: var(--fg); cursor: pointer; text-align: center; line-height: 1.3; transition: background 140ms var(--ease), border-color 140ms var(--ease), transform 120ms var(--ease-back), box-shadow 140ms var(--ease); min-height: 64px; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; position: relative; overflow: hidden; }
+    .answer-btn::after { content:''; position:absolute; inset:0; background:white; opacity:0; transition:opacity 200ms; border-radius:inherit; }
+    .answer-btn:active::after { opacity: 0.06; }
+    .answer-btn:active { transform: scale(0.97); }
+    .answer-btn:disabled { cursor: default; }
+    .answer-btn:disabled:active { transform: none; }
+    .answer-btn.correct { background: var(--correct-dim); border-color: var(--correct); color: var(--correct); box-shadow: 0 0 18px oklch(68% 0.18 145 / 0.18); }
+    .answer-btn.wrong   { background: var(--wrong-dim); border-color: var(--wrong); color: var(--wrong); }
+    .answer-btn.dimmed  { opacity: 0.35; }
+    @keyframes correctPop { 0%{transform:scale(1);} 40%{transform:scale(1.04);} 100%{transform:scale(1);} }
+    .answer-btn.correct { animation: correctPop 320ms var(--ease-back); }
+    .feedback-bar { height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 4px; opacity: 0; transform: translateY(6px); transition: opacity 200ms var(--ease), transform 200ms var(--ease); pointer-events: none; }
+    .feedback-bar.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .feedback-text { font-size: 14px; font-weight: 600; }
+    .feedback-text.correct { color: var(--correct); }
+    .feedback-text.wrong   { color: var(--wrong); }
+    .next-btn { display: flex; align-items: center; gap: 6px; background: var(--accent); color: #0a1a0f; border: none; border-radius: var(--r-xl); padding: 10px 18px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 120ms var(--ease-back); -webkit-tap-highlight-color: transparent; }
+    .next-btn:active { transform: scale(0.96); }
+    .next-btn svg { width: 16px; height: 16px; }
+    .home-indicator { height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .home-bar { width: 120px; height: 5px; background: rgba(255,255,255,0.25); border-radius: 99px; }
+    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: flex-end; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 250ms var(--ease); }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal-sheet { width: 100%; background: var(--surface); border-radius: var(--r-xl) var(--r-xl) 0 0; padding: 20px 20px 40px; transform: translateY(100%); transition: transform 300ms var(--ease); border-top: 1px solid var(--border-mid); }
+    .modal-overlay.open .modal-sheet { transform: translateY(0); }
+    .modal-handle { width: 36px; height: 4px; background: var(--meta); border-radius: 99px; margin: 0 auto 20px; }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--fg); margin-bottom: 6px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .lang-options { display: flex; flex-direction: column; gap: 10px; }
+    .lang-option { display: flex; align-items: center; gap: 14px; background: var(--surface-2); border: 1.5px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; cursor: pointer; transition: border-color 150ms, background 150ms; -webkit-tap-highlight-color: transparent; }
+    .lang-option.active { border-color: var(--accent); background: var(--accent-dim); }
+    .lang-option-flag { font-size: 22px; line-height: 1; }
+    .lang-option-info { flex: 1; }
+    .lang-option-name { font-size: 15px; font-weight: 600; color: var(--fg); }
+    .lang-option-sub  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .lang-check { width: 20px; height: 20px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 150ms; }
+    .lang-option.active .lang-check { opacity: 1; }
+    .lang-check svg { width: 11px; height: 11px; stroke: #0a1a0f; stroke-width: 2.5; fill: none; }
+    .end-screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 32px 24px; text-align: center; gap: 16px; }
+    .end-screen.visible { display: flex; }
+    .end-emoji { font-size: 64px; line-height: 1; margin-bottom: 4px; }
+    .end-title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+    .end-sub { font-size: 15px; color: var(--fg-2); line-height: 1.5; }
+    .end-stats { display: flex; gap: 16px; margin: 8px 0; }
+    .end-stat { background: var(--surface); border: 1px solid var(--border-mid); border-radius: var(--r-md); padding: 16px 20px; min-width: 90px; }
+    .end-stat-val { font-size: 28px; font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+    .end-stat-val.green { color: var(--correct); }
+    .end-stat-val.red   { color: var(--wrong); }
+    .end-stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .restart-btn { background: var(--accent); color: #0a1a0f; border: none; border-radius: var(--r-xl); padding: 15px 32px; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; transition: transform 120ms var(--ease-back); margin-top: 8px; }
+    .restart-btn:active { transform: scale(0.97); }
+    @media (min-width: 431px) {
+      .shell { background: #07090F; }
+      .phone { border-radius: 48px; box-shadow: 0 0 0 1px rgba(255,255,255,0.07), 0 40px 120px rgba(0,0,0,0.7); margin: 24px 0; }
+    }
+    @media (max-width: 430px) { .phone { height: 100dvh; } }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="phone" id="phone">
+    <div class="status-bar">
+      <span id="statusTime">9:41</span>
+      <div class="status-bar-icons">
+        <svg viewBox="0 0 24 24"><path d="M1.5 8.5C5.6 4.4 10.6 2.5 12 2.5s6.4 1.9 10.5 6M4.5 11.5C7.6 8.4 10.1 7 12 7s4.4 1.4 7.5 4.5M7.5 14.5C9.5 12.5 10.9 12 12 12s2.5.5 4.5 2.5M10.5 17.5c.6-.6 1-.9 1.5-.9s.9.3 1.5.9"/><circle cx="12" cy="21" r="1"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M2 10h3v8H2zM7 6h3v12H7zM12 3h3v15h-3zM17 8h3v10h-3z"/></svg>
+        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="18" height="11" rx="2" ry="2"/><path d="M22 11v3"/></svg>
+      </div>
+    </div>
+    <div class="header">
+      <div class="lang-pair" id="langPairBtn" role="button" tabindex="0" aria-label="Změnit jazykový pár">
+        <span class="lang-flag" id="headerSrcFlag">🇨🇿</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        <span class="lang-flag" id="headerTgtFlag">🇬🇧</span>
+        <div class="lang-labels">
+          <span class="lang-source" id="headerSrcName">Čeština</span>
+          <span class="lang-target" id="headerTgtName">Angličtina</span>
+        </div>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="color:var(--muted)"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="streak-badge">🔥 <span id="streakCount">7</span></div>
+    </div>
+    <div class="progress-area">
+      <div class="progress-row">
+        <span class="progress-label" id="progressLabel">1 / 15</span>
+        <span class="progress-score" id="progressScore">+0 bodů</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+    <div class="card-area" id="cardArea">
+      <div class="word-card" id="wordCard">
+        <p class="word-category" id="wordCategory">Podstatné jméno</p>
+        <p class="word-main" id="wordMain">světlo</p>
+        <p class="word-phonetic" id="wordPhonetic"></p>
+        <div class="word-example" id="wordExample">Zapni prosím <em>světlo</em> — je tu tma.</div>
+      </div>
+    </div>
+    <div class="end-screen" id="endScreen">
+      <div class="end-emoji" id="endEmoji">🎉</div>
+      <h2 class="end-title" id="endTitle">Výborně!</h2>
+      <p class="end-sub" id="endSub">Zvládl(a) jsi celé kolo.</p>
+      <div class="end-stats">
+        <div class="end-stat"><div class="end-stat-val green" id="endCorrect">0</div><div class="end-stat-label">Správně</div></div>
+        <div class="end-stat"><div class="end-stat-val red" id="endWrong">0</div><div class="end-stat-label">Chybně</div></div>
+        <div class="end-stat"><div class="end-stat-val" id="endScore" style="color:var(--accent)">0</div><div class="end-stat-label">Bodů</div></div>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">Hrát znovu</button>
+    </div>
+    <div class="answers-area" id="answersArea">
+      <div class="answers-grid">
+        <button class="answer-btn" id="ans0" onclick="selectAnswer(0)"></button>
+        <button class="answer-btn" id="ans1" onclick="selectAnswer(1)"></button>
+        <button class="answer-btn" id="ans2" onclick="selectAnswer(2)"></button>
+        <button class="answer-btn" id="ans3" onclick="selectAnswer(3)"></button>
+      </div>
+      <div class="feedback-bar" id="feedbackBar">
+        <span class="feedback-text" id="feedbackText"></span>
+        <button class="next-btn" onclick="nextWord()">Dál <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+    <div class="home-indicator"><div class="home-bar"></div></div>
+    <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Výběr jazykového páru">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <p class="modal-title">Jazykový pár</p>
+        <p class="modal-sub">Vyber směr překladu</p>
+        <div class="lang-options" id="langOptions"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const LANG_PAIRS = [
+  { id:'cs-en', srcFlag:'🇨🇿', srcCode:'CS', srcName:'Čeština', tgtFlag:'🇬🇧', tgtCode:'EN', tgtName:'Angličtina',
+    words:[
+      {word:'světlo',   translation:'light',     category:'Podstatné jméno', example:'Zapni prosím <em>světlo</em> — je tu tma.'},
+      {word:'řeka',     translation:'river',     category:'Podstatné jméno', example:'Skokal do studené <em>řeky</em>.'},
+      {word:'hvězda',   translation:'star',      category:'Podstatné jméno', example:'Na obloze svítí jasná <em>hvězda</em>.'},
+      {word:'chladný',  translation:'cool',      category:'Přídavné jméno', example:'Dnes je <em>chladný</em> vítr.'},
+      {word:'spát',     translation:'to sleep',  category:'Sloveso',         example:'Musím dnes brzy <em>spát</em>.'},
+      {word:'jablko',   translation:'apple',     category:'Podstatné jméno', example:'Snědl celé <em>jablko</em>.'},
+      {word:'okno',     translation:'window',    category:'Podstatné jméno', example:'Otevři <em>okno</em> — je dusno.'},
+      {word:'silný',    translation:'strong',    category:'Přídavné jméno', example:'Potřebujeme <em>silného</em> lídra.'},
+      {word:'psát',     translation:'to write',  category:'Sloveso',         example:'Každý den <em>píši</em> deník.'},
+      {word:'nebe',     translation:'sky',       category:'Podstatné jméno', example:'Dnes je <em>nebe</em> bez mráčku.'},
+      {word:'brzy',     translation:'soon',      category:'Příslovce',       example:'<em>Brzy</em> uvidíme výsledky.'},
+      {word:'stůl',     translation:'table',     category:'Podstatné jméno', example:'Kniha leží na <em>stole</em>.'},
+      {word:'teplý',    translation:'warm',      category:'Přídavné jméno', example:'Polévka je ještě <em>teplá</em>.'},
+      {word:'les',      translation:'forest',    category:'Podstatné jméno', example:'Prošli celým <em>lesem</em>.'},
+      {word:'rychle',   translation:'quickly',   category:'Příslovce',       example:'Mysli <em>rychle</em>, čas utíká.'},
+    ]},
+  { id:'cs-de', srcFlag:'🇨🇿', srcCode:'CS', srcName:'Čeština', tgtFlag:'🇩🇪', tgtCode:'DE', tgtName:'Němčina',
+    words:[
+      {word:'světlo',   translation:'Licht',     category:'Podstatné jméno', example:'Zapni prosím <em>světlo</em> — je tu tma.'},
+      {word:'řeka',     translation:'Fluss',     category:'Podstatné jméno', example:'Skokal do studené <em>řeky</em>.'},
+      {word:'hvězda',   translation:'Stern',     category:'Podstatné jméno', example:'Na obloze svítí jasná <em>hvězda</em>.'},
+      {word:'chladný',  translation:'kühl',      category:'Přídavné jméno', example:'Dnes je <em>chladný</em> vítr.'},
+      {word:'spát',     translation:'schlafen',  category:'Sloveso',         example:'Musím dnes brzy <em>spát</em>.'},
+      {word:'jablko',   translation:'Apfel',     category:'Podstatné jméno', example:'Snědl celé <em>jablko</em>.'},
+      {word:'okno',     translation:'Fenster',   category:'Podstatné jméno', example:'Otevři <em>okno</em> — je dusno.'},
+      {word:'silný',    translation:'stark',     category:'Přídavné jméno', example:'Potřebujeme <em>silného</em> lídra.'},
+      {word:'psát',     translation:'schreiben', category:'Sloveso',         example:'Každý den <em>píši</em> deník.'},
+      {word:'nebe',     translation:'Himmel',    category:'Podstatné jméno', example:'Dnes je <em>nebe</em> bez mráčku.'},
+      {word:'brzy',     translation:'bald',      category:'Příslovce',       example:'<em>Brzy</em> uvidíme výsledky.'},
+      {word:'stůl',     translation:'Tisch',     category:'Podstatné jméno', example:'Kniha leží na <em>stole</em>.'},
+      {word:'teplý',    translation:'warm',      category:'Přídavné jméno', example:'Polévka je ještě <em>teplá</em>.'},
+      {word:'les',      translation:'Wald',      category:'Podstatné jméno', example:'Prošli celým <em>lesem</em>.'},
+      {word:'rychle',   translation:'schnell',   category:'Příslovce',       example:'Mysli <em>rychle</em>, čas utíká.'},
+    ]},
+  { id:'en-de', srcFlag:'🇬🇧', srcCode:'EN', srcName:'Angličtina', tgtFlag:'🇩🇪', tgtCode:'DE', tgtName:'Němčina',
+    words:[
+      {word:'light',    translation:'Licht',     category:'Noun',     example:'Please turn on the <em>light</em>.'},
+      {word:'river',    translation:'Fluss',     category:'Noun',     example:'He jumped into the cold <em>river</em>.'},
+      {word:'star',     translation:'Stern',     category:'Noun',     example:'A bright <em>star</em> shone in the sky.'},
+      {word:'cool',     translation:'kühl',      category:'Adjective',example:'There is a <em>cool</em> breeze today.'},
+      {word:'sleep',    translation:'schlafen',  category:'Verb',     example:'I need to <em>sleep</em> early tonight.'},
+      {word:'apple',    translation:'Apfel',     category:'Noun',     example:'He ate the whole <em>apple</em>.'},
+      {word:'window',   translation:'Fenster',   category:'Noun',     example:'Open the <em>window</em> — it\'s stuffy.'},
+      {word:'strong',   translation:'stark',     category:'Adjective',example:'We need a <em>strong</em> leader.'},
+      {word:'write',    translation:'schreiben', category:'Verb',     example:'I <em>write</em> in my journal every day.'},
+      {word:'sky',      translation:'Himmel',    category:'Noun',     example:'The <em>sky</em> is clear today.'},
+      {word:'soon',     translation:'bald',      category:'Adverb',   example:'We will see results <em>soon</em>.'},
+      {word:'table',    translation:'Tisch',     category:'Noun',     example:'The book is on the <em>table</em>.'},
+      {word:'warm',     translation:'warm',      category:'Adjective',example:'The soup is still <em>warm</em>.'},
+      {word:'forest',   translation:'Wald',      category:'Noun',     example:'They walked through the whole <em>forest</em>.'},
+      {word:'quickly',  translation:'schnell',   category:'Adverb',   example:'Think <em>quickly</em> — time is running out.'},
+    ]}
+];
+
+let pairIndex=0, wordOrder=[], currentIndex=0, answered=false, correctCount=0, wrongCount=0, score=0;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function getPair(){return LANG_PAIRS[pairIndex];}
+
+function restartQuiz(){
+  const pair=getPair();
+  wordOrder=shuffle(pair.words.map((_,i)=>i));
+  currentIndex=0;answered=false;correctCount=0;wrongCount=0;score=0;
+  document.getElementById('endScreen').classList.remove('visible');
+  document.getElementById('endScreen').style.display='';
+  document.getElementById('cardArea').style.display='';
+  document.getElementById('answersArea').style.display='';
+  updateProgress();renderWord(false);hideFeedback();
+}
+
+function updateHeader(){
+  const p=getPair();
+  document.getElementById('headerSrcFlag').textContent=p.srcFlag;
+  document.getElementById('headerTgtFlag').textContent=p.tgtFlag;
+  document.getElementById('headerSrcName').textContent=p.srcName;
+  document.getElementById('headerTgtName').textContent=p.tgtName;
+}
+
+function updateProgress(){
+  const total=getPair().words.length;
+  document.getElementById('progressLabel').textContent=`${Math.min(currentIndex+1,total)} / ${total}`;
+  document.getElementById('progressScore').textContent=`+${score} bodů`;
+  document.getElementById('progressFill').style.width=(currentIndex/total*100)+'%';
+}
+
+function getDistractors(correctTrans,count){
+  const pool=getPair().words.map(w=>w.translation).filter(t=>t!==correctTrans);
+  return shuffle(pool).slice(0,count);
+}
+
+function renderWord(animate){
+  const entry=getPair().words[wordOrder[currentIndex]];
+  const card=document.getElementById('wordCard');
+  const doRender=()=>{
+    document.getElementById('wordCategory').textContent=entry.category;
+    document.getElementById('wordMain').textContent=entry.word;
+    document.getElementById('wordPhonetic').textContent='';
+    document.getElementById('wordExample').innerHTML=entry.example;
+    const distractors=getDistractors(entry.translation,3);
+    const options=shuffle([entry.translation,...distractors]);
+    const correctPos=options.indexOf(entry.translation);
+    for(let i=0;i<4;i++){
+      const btn=document.getElementById('ans'+i);
+      btn.textContent=options[i];btn.className='answer-btn';btn.disabled=false;
+      btn.dataset.correct=(i===correctPos)?'1':'0';
+    }
+    answered=false;
+    if(animate){card.classList.remove('flip-out');card.classList.add('flip-in');card.addEventListener('animationend',()=>card.classList.remove('flip-in'),{once:true});}
+  };
+  if(animate){card.classList.add('flip-out');card.addEventListener('animationend',doRender,{once:true});}
+  else doRender();
+}
+
+function selectAnswer(idx){
+  if(answered)return;answered=true;
+  const btn=document.getElementById('ans'+idx);
+  const correct=btn.dataset.correct==='1';
+  for(let i=0;i<4;i++){
+    const b=document.getElementById('ans'+i);b.disabled=true;
+    if(b.dataset.correct==='1')b.classList.add('correct');
+    else if(i===idx&&!correct)b.classList.add('wrong');
+    else b.classList.add('dimmed');
+  }
+  const ft=document.getElementById('feedbackText');
+  if(correct){correctCount++;score+=10;ft.textContent='✓ Správně! +10 bodů';ft.className='feedback-text correct';}
+  else{wrongCount++;ft.textContent='✗ Chybně — zapamatuj si správnou odpověď.';ft.className='feedback-text wrong';}
+  document.getElementById('feedbackBar').classList.add('visible');
+  document.getElementById('progressScore').textContent=`+${score} bodů`;
+}
+
+function hideFeedback(){document.getElementById('feedbackBar').classList.remove('visible');}
+
+function nextWord(){
+  hideFeedback();currentIndex++;
+  if(currentIndex>=getPair().words.length){showEnd();return;}
+  updateProgress();renderWord(true);
+}
+
+function showEnd(){
+  document.getElementById('cardArea').style.display='none';
+  document.getElementById('answersArea').style.display='none';
+  const pct=Math.round(correctCount/getPair().words.length*100);
+  const end=document.getElementById('endScreen');end.classList.add('visible');end.style.display='flex';
+  document.getElementById('endEmoji').textContent=pct>=80?'🎉':pct>=50?'💪':'📚';
+  document.getElementById('endTitle').textContent=pct>=80?'Výborně!':pct>=50?'Dobrá práce!':'Pokračuj v tréninku!';
+  document.getElementById('endSub').textContent=`${pct} % správně — paměť se tříbí opakováním.`;
+  document.getElementById('endCorrect').textContent=correctCount;
+  document.getElementById('endWrong').textContent=wrongCount;
+  document.getElementById('endScore').textContent=score;
+  document.getElementById('progressFill').style.width='100%';
+}
+
+function openLangModal(){
+  const opts=document.getElementById('langOptions');opts.innerHTML='';
+  LANG_PAIRS.forEach((pair,i)=>{
+    const div=document.createElement('div');
+    div.className='lang-option'+(i===pairIndex?' active':'');
+    div.innerHTML=`<span class="lang-option-flag">${pair.srcFlag}→${pair.tgtFlag}</span><div class="lang-option-info"><div class="lang-option-name">${pair.srcName} → ${pair.tgtName}</div><div class="lang-option-sub">${pair.srcCode} · ${pair.tgtCode}</div></div><div class="lang-check"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>`;
+    div.addEventListener('click',()=>{pairIndex=i;closeLangModal();updateHeader();restartQuiz();});
+    opts.appendChild(div);
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeLangModal(){document.getElementById('modalOverlay').classList.remove('open');}
+
+document.getElementById('langPairBtn').addEventListener('click',openLangModal);
+document.getElementById('langPairBtn').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openLangModal();}});
+document.getElementById('modalOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('modalOverlay'))closeLangModal();});
+
+function updateClock(){const n=new Date();document.getElementById('statusTime').textContent=`${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}`;}
+updateClock();setInterval(updateClock,30000);
+updateHeader();restartQuiz();
+</script>
+</body>
+</html>

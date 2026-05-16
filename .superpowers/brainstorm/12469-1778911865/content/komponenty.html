@@ -1,0 +1,96 @@
+<h2>Rozložení komponent</h2>
+<p class="subtitle">Jak design.html rozpadáme do React komponent — každá má jednu jasnou zodpovědnost</p>
+
+<div class="section">
+  <div class="split" style="align-items:flex-start;gap:24px">
+
+    <div class="mockup" style="flex:1;min-width:0">
+      <div class="mockup-header">📱 Vizuální mapa komponent</div>
+      <div class="mockup-body" style="padding:0">
+        <div style="border:2px dashed #475569;border-radius:12px;padding:10px;margin:8px;font-size:11px">
+          <div style="color:#94a3b8;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">App.tsx</div>
+
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:8px;color:#7dd3fc;font-size:12px">
+            ⏳ LoadingScreen — zobrazí se dokud se načítá CSV
+          </div>
+
+          <div style="border:2px dashed #3b4a6b;border-radius:10px;padding:8px;margin-bottom:8px">
+            <div style="color:#c084fc;font-weight:700;font-size:11px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.08em">QuizScreen.tsx</div>
+
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:12px">
+                <span style="color:#86efac">🇨🇿→🇬🇧</span>
+                <span style="color:#64748b;margin-left:6px">LangPairButton</span>
+              </div>
+              <div style="color:#fbbf24;font-size:12px">🔥 7</div>
+            </div>
+
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:6px">
+              <div style="font-size:11px;color:#7dd3fc;margin-bottom:4px">ProgressBar.tsx</div>
+              <div style="height:4px;background:#0f172a;border-radius:4px"><div style="width:40%;height:100%;background:#22c55e;border-radius:4px"></div></div>
+            </div>
+
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px;margin-bottom:6px;text-align:center">
+              <div style="font-size:11px;color:#c084fc;margin-bottom:4px">WordCard.tsx</div>
+              <div style="font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.08em">Podstatné jméno</div>
+              <div style="font-size:22px;font-weight:700;color:#f0f2f8;margin:6px 0">světlo</div>
+              <div style="font-size:11px;color:#475569;background:#0f172a;border-radius:6px;padding:6px">Zapni prosím <em style="color:#22c55e">světlo</em> — je tu tma.</div>
+            </div>
+
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px;margin-bottom:6px">
+              <div style="font-size:11px;color:#c084fc;margin-bottom:6px">AnswerGrid.tsx</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+                <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px;text-align:center;font-size:12px;color:#f0f2f8">light</div>
+                <div style="background:#0f172a;border:1px solid #22c55e;border-radius:8px;padding:8px;text-align:center;font-size:12px;color:#22c55e">Licht ✓</div>
+                <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px;text-align:center;font-size:12px;color:#f0f2f8;opacity:.4">lumière</div>
+                <div style="background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px;text-align:center;font-size:12px;color:#f0f2f8;opacity:.4">luz</div>
+              </div>
+            </div>
+
+            <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center">
+              <div style="font-size:11px;color:#c084fc;margin-right:8px">FeedbackBar</div>
+              <div style="font-size:12px;color:#22c55e">✓ Správně! +10 bodů</div>
+              <div style="background:#22c55e;color:#0a1a0f;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700">Dál →</div>
+            </div>
+          </div>
+
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;margin-bottom:8px;color:#7dd3fc;font-size:12px">
+            🏁 EndScreen.tsx — výsledky kola, tlačítko restart
+          </div>
+
+          <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:8px 12px;color:#7dd3fc;font-size:12px">
+            🗂 LangPairModal.tsx — bottom sheet, výběr CS↔EN / CS↔DE / EN↔DE
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px;font-size:12px">
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">App.tsx</div>
+        <div style="color:#94a3b8">Volá <code>useWords()</code>, drží vybraný langPair, přepíná mezi LoadingScreen / QuizScreen / EndScreen.</div>
+      </div>
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">QuizScreen.tsx</div>
+        <div style="color:#94a3b8">Volá <code>useQuiz()</code>, rozkládá stav do child komponent. Neobsahuje žádnou logiku — jen propojuje.</div>
+      </div>
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">WordCard.tsx</div>
+        <div style="color:#94a3b8">Zobrazí slovo, kategorii a příkladovou větu. Přijímá <code>question: QuizQuestion</code>, animuje přechod (flip-in/out CSS třídy).</div>
+      </div>
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">AnswerGrid.tsx</div>
+        <div style="color:#94a3b8">4 tlačítka, přijímá <code>options</code>, <code>selectedIdx</code>, <code>onSelect</code>. Po výběru zobrazí correct / wrong / dimmed stav.</div>
+      </div>
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">ProgressBar.tsx</div>
+        <div style="color:#94a3b8">Čistě prezentační. Přijímá <code>current</code>, <code>total</code>, <code>score</code> — renderuje pruh a text.</div>
+      </div>
+      <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+        <div style="color:#c084fc;font-weight:700;margin-bottom:4px">FeedbackBar + EndScreen + LangPairModal</div>
+        <div style="color:#94a3b8">Čistě prezentační komponenty řízené props. Žádný vlastní state — vše přichází shora.</div>
+      </div>
+    </div>
+
+  </div>
+</div>

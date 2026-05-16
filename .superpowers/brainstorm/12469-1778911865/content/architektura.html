@@ -1,0 +1,40 @@
+<h2>Jak postavit aplikaci?</h2>
+<p class="subtitle">Existující <code>design.html</code> je plně funkční — otázka je, jak ho rozšířit o reálná CSV data a případně další funkce.</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Rozšířit design.html — pure vanilla JS</h3>
+      <p>Zachovat jediný HTML soubor. Přidat CSV parser, načíst <code>slovicka.csv</code> přes <code>fetch()</code> a nahradit hardcoded data. Žádný build systém.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Výhody</h4><ul><li>Nulová komplexita — jeden soubor</li><li>Funguje bez instalace čehokoli</li><li>Jednoduché nasazení</li></ul></div>
+        <div class="cons"><h4>Nevýhody</h4><ul><li>Při růstu funkcí se soubor stane nepřehledný</li><li>CSV musí být přístupné přes server (ne přímo z disku)</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Vite + vanilla JS — modulární, bez frameworku ⭐ doporučeno</h3>
+      <p>Rozdělit do modulů: <code>data.js</code> (CSV parser), <code>quiz.js</code> (logika), <code>main.js</code> (UI). Vite builduje do statických souborů. Styl zůstane identický s designem.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Výhody</h4><ul><li>Čistá modulární struktura</li><li>Hot reload při vývoji</li><li>Snadné nasazení kamkoli (GitHub Pages, Netlify...)</li><li>Žádný framework — design se nemusí přepisovat</li></ul></div>
+        <div class="cons"><h4>Nevýhody</h4><ul><li>Potřeba Node.js + npm</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>React / Vue — komponentový framework</h3>
+      <p>Přepsat do moderního frameworku. Každá obrazovka = komponenta. Silný state management.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Výhody</h4><ul><li>Nejlepší škálovatelnost do budoucna</li></ul></div>
+        <div class="cons"><h4>Nevýhody</h4><ul><li>Overkill pro tuto velikost projektu</li><li>Existující CSS/HTML design se musí přepsat</li><li>Větší bundle, složitější setup</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

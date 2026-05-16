@@ -1,0 +1,96 @@
+<h2>Fáze 1 — Architektura</h2>
+<p class="subtitle">React + TypeScript + Vite · CSV runtime · Firebase Hosting</p>
+
+<div class="section">
+  <h3>Struktura projektu</h3>
+  <div class="mockup">
+    <div class="mockup-header">📁 Adresářová struktura</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8;color:#e2e8f0">
+      <span style="color:#94a3b8">dedicto2/</span><br>
+      ├── <span style="color:#7dd3fc">public/</span><br>
+      │&nbsp;&nbsp;&nbsp;└── <span style="color:#86efac">slovicka.csv</span> <span style="color:#64748b">← zdrojová data, editovatelná kdykoli</span><br>
+      ├── <span style="color:#7dd3fc">src/</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#7dd3fc">types/</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span style="color:#fbbf24">word.ts</span> <span style="color:#64748b">← Word, LangPair, QuizConfig typy</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#7dd3fc">utils/</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#fbbf24">csvParser.ts</span> <span style="color:#64748b">← PapaParse wrapper, validace</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span style="color:#fbbf24">shuffle.ts</span> <span style="color:#64748b">← Fisher-Yates shuffle</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#7dd3fc">hooks/</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#fbbf24">useWords.ts</span> <span style="color:#64748b">← fetch + parse CSV, loading/error state</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span style="color:#fbbf24">useQuiz.ts</span> <span style="color:#64748b">← veškerá kvízová logika</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#7dd3fc">components/</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">WordCard.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">AnswerGrid.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">ProgressBar.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">LangPairModal.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">EndScreen.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;│&nbsp;&nbsp;&nbsp;└── <span style="color:#c084fc">LoadingScreen.tsx</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">QuizScreen.tsx</span> <span style="color:#64748b">← orchestruje komponenty kvízu</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#c084fc">App.tsx</span> <span style="color:#64748b">← root, data loading, routing mezi obrazovkami</span><br>
+      │&nbsp;&nbsp;&nbsp;├── <span style="color:#fbbf24">App.css</span> <span style="color:#64748b">← CSS proměnné z design.html (beze změny)</span><br>
+      │&nbsp;&nbsp;&nbsp;└── <span style="color:#fbbf24">main.tsx</span><br>
+      ├── <span style="color:#fbbf24">firebase.json</span><br>
+      └── <span style="color:#fbbf24">vite.config.ts</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Datový tok</h3>
+  <div class="mockup">
+    <div class="mockup-header">🔄 Jak data tečou aplikací</div>
+    <div class="mockup-body" style="font-size:13px;line-height:2;color:#e2e8f0">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 16px">
+          <span style="color:#86efac">📄 public/slovicka.csv</span>
+          <span style="color:#64748b"> — zdroj pravdy, semicolon-separated, UTF-8</span>
+        </div>
+        <div style="text-align:center;color:#64748b">↓ fetch() při startu aplikace</div>
+        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 16px">
+          <span style="color:#7dd3fc">useWords()</span>
+          <span style="color:#64748b"> — načte CSV, parsuje přes PapaParse, vrátí </span>
+          <code style="color:#fbbf24">Word[]</code>
+        </div>
+        <div style="text-align:center;color:#64748b">↓ předá pole slov</div>
+        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 16px">
+          <span style="color:#7dd3fc">useQuiz(words, langPair)</span>
+          <span style="color:#64748b"> — shuffle, výběr 4 možností, scoring, stav kola</span>
+        </div>
+        <div style="text-align:center;color:#64748b">↓ předá stav a akce</div>
+        <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:10px 16px">
+          <span style="color:#c084fc">QuizScreen</span>
+          <span style="color:#64748b"> → </span>
+          <span style="color:#c084fc">WordCard</span>
+          <span style="color:#64748b"> + </span>
+          <span style="color:#c084fc">AnswerGrid</span>
+          <span style="color:#64748b"> + </span>
+          <span style="color:#c084fc">ProgressBar</span>
+          <span style="color:#64748b"> + </span>
+          <span style="color:#c084fc">FeedbackBar</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Klíčová rozhodnutí</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+      <div style="color:#7dd3fc;font-weight:600;margin-bottom:6px">State management</div>
+      <div style="color:#cbd5e1">Čistě React hooks (useState + useReducer). Žádný Redux/Zustand — v Fázi 1 není potřeba.</div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+      <div style="color:#7dd3fc;font-weight:600;margin-bottom:6px">Styling</div>
+      <div style="color:#cbd5e1">CSS z design.html přeneseme 1:1 do App.css. Žádný Tailwind, žádné CSS-in-JS — design je hotový.</div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+      <div style="color:#7dd3fc;font-weight:600;margin-bottom:6px">Routing</div>
+      <div style="color:#cbd5e1">Podmíněné renderování v App.tsx (loading → quiz → end). React Router není v Fázi 1 nutný.</div>
+    </div>
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:8px;padding:12px">
+      <div style="color:#7dd3fc;font-weight:600;margin-bottom:6px">Kvíz — počet slov</div>
+      <div style="color:#cbd5e1">Každé kolo = náhodných 15 slov z celého CSV. Konfigurovatelné konstantou QUIZ_SIZE.</div>
+    </div>
+  </div>
+</div>

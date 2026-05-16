@@ -1,0 +1,23 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$f = 'C:\\Users\\fykus\\.claude\\projects\\d---FYKA-AI-DEdicto2\\memory\\session-next.md'; if (Test-Path $f) { $content = (Get-Content $f -Raw).Trim(); @{hookSpecificOutput = @{hookEventName = 'SessionStart'; additionalContext = \"PŘÍŠTÍ KROK (session-next.md):\\n$content\"}} | ConvertTo-Json -Compress } else { '{}' }"
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$f = Join-Path $env:PWD '.claude\\tasks.md'; if (Test-Path $f) { $content = (Get-Content $f -Raw).Trim(); @{hookSpecificOutput = @{hookEventName = 'SessionStart'; additionalContext = \"## Cekajici ukoly z minule sesny\\n$content\"}} | ConvertTo-Json -Compress } else { '{}' }"
+          }
+        ]
+      }
+    ]
+  },
+  "env": {
+    "ECC_DISABLED_HOOKS": "pre:edit-write:gateguard-fact-force"
+  }
+}
