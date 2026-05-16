@@ -1,99 +1,62 @@
-# DEdicto2 — Kontext pro agenta
+# DEdicto
 
-**Datum poslední aktualizace:** 2026-05-16  
-**Stav projektu:** Fáze 1 kompletně nasazena → https://dedictio.web.app
-zname chyby:
- - nefunkcni prepinani jazyku
- - po vyberu neskoci na dalsi slovo
- - design jiny nez pozadovany v src\design.html
+Aplikace pro procvičování cizojazyčných slovíček formou výběru ze čtyř možností.
 
----
+## Language
 
-## Co to je
+**Slovíčko**:
+Jeden záznam s překladem do tří jazyků (čeština, angličtina, němčina) a kategorií.
+_Avoid_: slovo, položka, záznam
 
-**DEdicto** je PWA kvízová aplikace pro učení slovíček ve třech jazycích: čeština / angličtina / němčina. Uživatel vybere jazykový pár (CS↔EN, CS↔DE, EN↔DE) a prochází 15 náhodně vybraných slov v multiple-choice formátu.
+**Jazykový pár**:
+Jednosměrná kombinace zdrojového a cílového jazyka. Určuje, co je zobrazeno jako otázka a co jako správná odpověď. Existuje 6 párů (všechny kombinace CZ/EN/DE v obou směrech).
+_Avoid_: jazyk, směr, mód
 
----
+**Kolo**:
+Jedna sekvence 15 náhodně vybraných Slovíček v daném Jazykovém páru. Kolo končí zobrazením výsledku. Kola nemají paměť — každé nové Kolo generuje novou náhodnou sadu bez ohledu na výsledky předchozího.
+_Avoid_: session, hra, test, round
 
-## Co bylo uděláno (Fáze 1)
+**Otázka**:
+Jedno Slovíčko v rámci Kola: zobrazí se zdrojový tvar, uživatel vybírá správný cílový tvar ze čtyř možností.
+_Avoid_: karta, úkol, položka kola
 
-Celá Fáze 1 byla naplánována a implementována v jednom dni (2026-05-16) metodou TDD v 18 krocích:
+**Distraktory**:
+Tři nesprávné možnosti v Otázce, náhodně vybrané z ostatních Slovíček ve stejném cílovém jazyce.
+_Avoid_: špatné odpovědi, falešné možnosti
 
-| Task | Co bylo uděláno |
-|------|----------------|
-| 1 | Vite + React + TS scaffold, vite-plugin-pwa, Vitest + RTL, git init |
-| 2 | TypeScript typy: `Word`, `LangPair`, `QuizQuestion`, `QuizState`, `LANG_PAIRS`, `QUIZ_SIZE=15` |
-| 3 | `shuffle.ts` — Fisher-Yates, 4 TDD testy |
-| 4 | `csvParser.ts` — PapaParse wrapper, validace sloupců, 3 TDD testy |
-| 5 | CSS port z `design.html` 1:1 do `App.css` (114 řádků, dark theme) |
-| 6 | `LoadingScreen.tsx` — spinner + error hláška, 3 TDD testy |
-| 7 | `ProgressBar.tsx` — pruh + "X/Y" + skóre, 3 TDD testy |
-| 8 | `WordCard.tsx` — zobrazení slova a kategorie, 2 TDD testy |
-| 9 | `AnswerGrid.tsx` — 4 tlačítka, correct/wrong/dimmed stavy, 5 TDD testů |
-| 10 | `FeedbackBar.tsx` — zpětná vazba + tlačítko Dál, 3 TDD testy |
-| 11 | `LangPairModal.tsx` + `EndScreen.tsx` — výběr páru, výsledková obrazovka |
-| 12 | `useWords` hook — fetch + parseWordsCsv, 3 TDD testy |
-| 13 | `useQuiz` hook — useReducer state machine, 8 TDD testů |
-| 14 | `QuizScreen.tsx` — orchestrátor všech komponent, 2 TDD testy |
-| 15 | `App.tsx` — root, přepínání fází (loading/lang-select/quiz/end) |
-| 16 | PWA ikony 192×512 px generované Node.js scriptem (sharp) |
-| 17 | `firebase.json` + `.firebaserc` (projekt `dedictio`) |
-| 18 | `npm run build` → `firebase deploy` → nasazeno, 49/49 testů, 0 TS chyb |
+**Skóre**:
+Počet bodů získaných v Kole. +10 za každou správně zodpovězenou Otázku.
+_Avoid_: body, výsledek
 
----
+**Výchozí jazykový pár**:
+Jazykový pár aktivní při prvním spuštění aplikace bez jakékoli interakce uživatele. Je to DE→CZ.
+_Avoid_: default, počáteční nastavení
 
-## Klíčové soubory
+## Relationships
 
-```
-dedicto2/
-├── public/
-│   ├── slovicka.csv          ← zdrojová data (editovatelná bez rebuildu)
-│   └── icons/icon-192.png, icon-512.png
-├── src/
-│   ├── types/word.ts
-│   ├── utils/csvParser.ts, shuffle.ts
-│   ├── hooks/useWords.ts, useQuiz.ts
-│   ├── components/
-│   │   ├── LoadingScreen.tsx
-│   │   ├── WordCard.tsx, AnswerGrid.tsx
-│   │   ├── ProgressBar.tsx, FeedbackBar.tsx
-│   │   ├── LangPairModal.tsx, EndScreen.tsx
-│   ├── QuizScreen.tsx, App.tsx, App.css, main.tsx
-├── firebase.json, .firebaserc
-├── vite.config.ts
-└── docs/
-    ├── superpowers/specs/2026-05-16-faze1-kviz-design.md  ← detailní spec
-    └── superpowers/plans/2026-05-16-faze1-kviz.md         ← 18-taskový TDD plán
-```
+- **Kolo** obsahuje právě 15 **Otázek**
+- Každá **Otázka** má právě jednu správnou odpověď a tři **Distraktory**
+- **Distraktory** jsou vybírány ze Slovíček stejného **Jazykového páru** (cílový jazyk)
+- **Skóre** je vlastností **Kola**, ne uživatele (není persistováno)
 
----
+## Rules
 
-## Stack
+- Změna **Jazykového páru** okamžitě restartuje aktuální **Kolo** — progres se zahodí, generuje se nová sada Slovíček.
+- **Distraktoré** nesmí být shodné se správnou odpovědí (string porovnání) — duplicitní překlady se ze seznamu kandidátů vyfiltrují.
+- **EndScreen** nabízí dvě akce: „Hrát znovu" (nové Kolo ve stejném Jazykovém páru) a „Změnit jazyk" (otevře LangPairModal, výběr páru spustí nové Kolo).
 
-- React 18 + TypeScript + Vite
-- PapaParse (CSV parsing)
-- vite-plugin-pwa (service worker, offline)
-- Vitest + React Testing Library
-- Firebase Hosting (projekt: `dedictio`)
-- Vanilla CSS (dark theme, mobile-first, 430px max-width)
+## Example dialogue
 
----
+> **Dev:** "Když uživatel restartuje, vrátíme stejná Slovíčka nebo nová?"
+> **Domain expert:** "Nová — každé Kolo je nezávislé, žádná paměť předchozích Kol."
 
-## Plánované fáze
+> **Dev:** "Jsou Distraktory vybírány z celého CSV nebo jen z aktuálního Kola?"
+> **Domain expert:** "Z celého CSV — větší pool znamená různorodější Distraktory."
 
-| Fáze | Obsah | Stav |
-|------|-------|------|
-| 1 | Základní kvíz PWA | ✅ Nasazeno |
-| 2 | Filtry podle kategorie | Neplánováno |
-| 3 | Firebase Auth + Firestore progress | Neplánováno |
-| 4 | SM-2 spaced repetition + písemný mód | Neplánováno |
+**Kategorie**:
+Informační štítek Slovíčka (např. „zvířata", „jídlo") zobrazený na kartě Otázky. V Fázi 1 slouží pouze k orientaci uživatele — neovlivňuje výběr Slovíček do Kola.
+_Avoid_: skupina, téma, filtr
 
----
+## Flagged ambiguities
 
-## Důležité poznámky pro agenta
-
-- **CSV zůstává v `public/`** — aktualizace slovíček nevyžaduje rebuild
-- **Žádná externí state knihovna** — pouze `useState` + `useReducer`
-- **TDD přístup** — každá komponenta a hook má testy napsané před implementací
-- **GateGuard hook** je nakonfigurován v `CLAUDE.md` projektu
-- Tasky se evidují v `.claude/tasks.md`
+- _(zatím žádné)_
