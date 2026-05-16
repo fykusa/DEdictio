@@ -6,7 +6,7 @@ interface Props {
 
 export function FeedbackBar({ correct, score, onNext }: Props) {
   return (
-    <div className={`feedback-bar ${correct ? 'feedback-correct' : 'feedback-wrong'}`}>
+    <div className={`feedback-bar visible ${correct ? 'feedback-correct' : 'feedback-wrong'}`}>
       <span className="feedback-text">
         {correct ? `✓ Správně! +10 bodů` : `✗ Špatně`}
       </span>

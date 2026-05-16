@@ -10,7 +10,7 @@ describe('EndScreen', () => {
         wrongCount={3}
         score={120}
         total={15}
-        onRestart={() => {}}
+        onRestart={() => {}} onChangeLang={() => {}}
       />
     )
     expect(screen.getByText('12')).toBeInTheDocument()
@@ -25,6 +25,7 @@ describe('EndScreen', () => {
         score={120}
         total={15}
         onRestart={onRestart}
+        onChangeLang={() => {}}
       />
     )
     fireEvent.click(screen.getByText(/Znovu/i))
