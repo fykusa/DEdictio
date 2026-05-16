@@ -16,11 +16,15 @@ export function parseWordsCsv(csvText: string): Word[] {
     throw new Error(`Chybí sloupce: ${missing.join(', ')}`)
   }
 
-  return result.data.map(row => ({
-    id: Number(row.id),
-    cesky: row.cesky.trim(),
-    anglicky: row.anglicky.trim(),
-    nemecky: row.nemecky.trim(),
-    kategorie: row.kategorie.trim(),
-  }))
+  return result.data
+    .filter(row =>
+      REQUIRED_COLUMNS.every(col => row[col] !== undefined && row[col] !== null)
+    )
+    .map(row => ({
+      id: Number(row.id),
+      cesky: (row.cesky ?? '').trim(),
+      anglicky: (row.anglicky ?? '').trim(),
+      nemecky: (row.nemecky ?? '').trim(),
+      kategorie: (row.kategorie ?? '').trim(),
+    }))
 }
