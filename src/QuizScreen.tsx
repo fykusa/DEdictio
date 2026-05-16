@@ -21,13 +21,27 @@ export function QuizScreen({ words, langPair, onChangeLang }: Props) {
 
   if (state.phase === 'end') {
     return (
-      <EndScreen
-        correctCount={state.correctCount}
-        wrongCount={state.wrongCount}
-        score={state.score}
-        total={state.questions.length}
-        onRestart={restart}
-      />
+      <>
+        <EndScreen
+          correctCount={state.correctCount}
+          wrongCount={state.wrongCount}
+          score={state.score}
+          total={state.questions.length}
+          onRestart={restart}
+          onChangeLang={() => setShowModal(true)}
+        />
+        {showModal && (
+          <LangPairModal
+            pairs={LANG_PAIRS}
+            activePairId={langPair.id}
+            onSelect={pair => {
+              onChangeLang(pair)
+              setShowModal(false)
+            }}
+            onClose={() => setShowModal(false)}
+          />
+        )}
+      </>
     )
   }
 

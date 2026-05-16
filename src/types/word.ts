@@ -9,7 +9,7 @@ export interface Word {
 export type WordKey = 'cesky' | 'anglicky' | 'nemecky'
 
 export interface LangPair {
-  id: 'cs-en' | 'cs-de' | 'en-de'
+  id: 'cs-en' | 'en-cs' | 'cs-de' | 'de-cs' | 'en-de' | 'de-en'
   srcLang: WordKey
   tgtLang: WordKey
   srcLabel: string
@@ -48,6 +48,15 @@ export const LANG_PAIRS: LangPair[] = [
     tgtFlag: '🇬🇧',
   },
   {
+    id: 'en-cs',
+    srcLang: 'anglicky',
+    tgtLang: 'cesky',
+    srcLabel: 'Angličtina',
+    tgtLabel: 'Čeština',
+    srcFlag: '🇬🇧',
+    tgtFlag: '🇨🇿',
+  },
+  {
     id: 'cs-de',
     srcLang: 'cesky',
     tgtLang: 'nemecky',
@@ -57,6 +66,15 @@ export const LANG_PAIRS: LangPair[] = [
     tgtFlag: '🇩🇪',
   },
   {
+    id: 'de-cs',
+    srcLang: 'nemecky',
+    tgtLang: 'cesky',
+    srcLabel: 'Němčina',
+    tgtLabel: 'Čeština',
+    srcFlag: '🇩🇪',
+    tgtFlag: '🇨🇿',
+  },
+  {
     id: 'en-de',
     srcLang: 'anglicky',
     tgtLang: 'nemecky',
@@ -64,6 +82,15 @@ export const LANG_PAIRS: LangPair[] = [
     tgtLabel: 'Němčina',
     srcFlag: '🇬🇧',
     tgtFlag: '🇩🇪',
+  },
+  {
+    id: 'de-en',
+    srcLang: 'nemecky',
+    tgtLang: 'anglicky',
+    srcLabel: 'Němčina',
+    tgtLabel: 'Angličtina',
+    srcFlag: '🇩🇪',
+    tgtFlag: '🇬🇧',
   },
 ]
 

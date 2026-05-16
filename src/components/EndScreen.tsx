@@ -6,9 +6,10 @@ interface Props {
   score: number
   total: number
   onRestart: () => void
+  onChangeLang: () => void
 }
 
-export function EndScreen({ correctCount, wrongCount, score, total, onRestart }: Props) {
+export function EndScreen({ correctCount, wrongCount, score, total, onRestart, onChangeLang }: Props) {
   return (
     <div className="end-screen">
       <h2 className="end-title">Kolo dokončeno!</h2>
@@ -29,6 +30,9 @@ export function EndScreen({ correctCount, wrongCount, score, total, onRestart }:
       <div className="end-total">z {total} otázek</div>
       <button className="btn-restart" onClick={onRestart}>
         Znovu →
+      </button>
+      <button className="btn-change-lang" onClick={onChangeLang}>
+        Změnit jazyk
       </button>
     </div>
   )

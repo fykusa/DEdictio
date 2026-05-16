@@ -80,3 +80,21 @@
 .btn-restart:active {
   transform: translateY(0);
 }
+
+.btn-change-lang {
+  margin-top: 12px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  cursor: pointer;
+  align-self: center;
+  transition: background 0.2s;
+}
+
+.btn-change-lang:hover {
+  background: rgba(255, 255, 255, 0.25);
+}

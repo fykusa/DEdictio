@@ -8,7 +8,9 @@ import './App.css'
 
 export function App() {
   const { words, loading, error } = useWords()
-  const [langPair, setLangPair] = useState<LangPair>(LANG_PAIRS[0])
+  const [langPair, setLangPair] = useState<LangPair>(
+    LANG_PAIRS.find(p => p.id === 'de-cs') ?? LANG_PAIRS[0]
+  )
 
   if (loading || error) {
     return <LoadingScreen error={error ?? undefined} />

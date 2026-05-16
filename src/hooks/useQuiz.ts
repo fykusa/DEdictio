@@ -1,4 +1,4 @@
-import { useReducer, useMemo } from 'react'
+import { useReducer, useMemo, useEffect } from 'react'
 import type { Word, LangPair, QuizQuestion, QuizState } from '../types/word'
 import { QUIZ_SIZE } from '../types/word'
 import { shuffled } from '../utils/shuffle'
@@ -13,7 +13,10 @@ function buildQuestions(words: Word[], langPair: LangPair): QuizQuestion[] {
   return pool.map(word => {
     const correct = word[langPair.tgtLang]
     const distractors = shuffled(
-      words.filter(w => w.id !== word.id).map(w => w[langPair.tgtLang])
+      words
+        .filter(w => w.id !== word.id)
+        .map(w => w[langPair.tgtLang])
+        .filter(t => t !== correct)
     ).slice(0, 3)
     const options = shuffled([correct, ...distractors])
     return {
@@ -66,8 +69,12 @@ function reducer(state: QuizState, action: Action): QuizState {
 }
 
 export function useQuiz(words: Word[], langPair: LangPair) {
-  const initialQuestions = useMemo(() => buildQuestions(words, langPair), [])
+  const initialQuestions = useMemo(() => buildQuestions(words, langPair), [langPair])
   const [state, dispatch] = useReducer(reducer, initialState(initialQuestions))
+
+  useEffect(() => {
+    dispatch({ type: 'RESTART', questions: buildQuestions(words, langPair) })
+  }, [langPair])
 
   function select(index: number) { dispatch({ type: 'SELECT', index }) }
   function next() { dispatch({ type: 'NEXT' }) }
