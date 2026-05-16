@@ -1,73 +1,93 @@
-# React + TypeScript + Vite
+# DEdicto — Kvíz slovíček
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Webová aplikace (PWA) pro procvičování slovíček v češtině, angličtině a němčině.
 
-Currently, two official plugins are available:
+**Živá verze:** https://dedictio.web.app
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Co to umí
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Multiple-choice kvíz: vždy 15 náhodně vybraných slov
+- Tři jazykové páry: **CZ↔EN**, **CZ↔DE**, **EN↔DE**
+- Zpětná vazba po každé odpovědi (správně / špatně + body)
+- Výsledková obrazovka se skóre a možností opakování
+- **PWA** — funguje offline po prvním spuštění, instalovatelné na mobilní plochu
+- Mobilní design (dark theme, dotyková tlačítka)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Slovíčka
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Data jsou v souboru `public/slovicka.csv` (semicolon-separated, UTF-8):
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+id;cesky;anglicky;nemecky;kategorie
+1;pes;dog;der Hund;zvířata
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Soubor lze editovat přímo — žádný rebuild aplikace není potřeba.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Lokální vývoj
+
+```bash
+npm install
+npm run dev        # http://localhost:5173
+npm run test       # Vitest (watch mode)
+npm run build      # produkční build → dist/
 ```
+
+---
+
+## Deploy
+
+```bash
+npm run build
+firebase deploy
+```
+
+Hosting je nakonfigurován na Firebase projekt `dedictio`.
+
+---
+
+## Architektura
+
+```
+public/slovicka.csv
+  └─→ useWords()       — fetch + PapaParse
+        └─→ useQuiz()  — Fisher-Yates shuffle, scoring, useReducer
+              └─→ QuizScreen → komponenty
+```
+
+| Soubor | Zodpovědnost |
+|--------|-------------|
+| `src/hooks/useWords.ts` | Načtení a parsování CSV |
+| `src/hooks/useQuiz.ts` | Celá kvízová logika (state machine) |
+| `src/QuizScreen.tsx` | Orchestrátor komponent |
+| `src/App.tsx` | Root — přepínání fází (loading / výběr páru / kvíz / výsledky) |
+| `src/utils/shuffle.ts` | Fisher-Yates shuffle |
+| `src/utils/csvParser.ts` | PapaParse wrapper s validací sloupců |
+
+---
+
+## Stack
+
+- React 18 + TypeScript
+- Vite + vite-plugin-pwa
+- PapaParse
+- Vitest + React Testing Library
+- Firebase Hosting
+- Vanilla CSS (bez UI knihovny)
+
+---
+
+## Testy
+
+```bash
+npm run test              # watch mode
+npm run test -- --run     # jednorázově
+```
+
+49 testů, pokrytí všech komponent, hooků a utilit metodou TDD.
