@@ -8,7 +8,7 @@ test('zobrazí text "3 / 15"', () => {
 
 test('zobrazí skóre', () => {
   render(<ProgressBar current={3} total={15} score={30} />)
-  expect(screen.getByText('30')).toBeInTheDocument()
+  expect(screen.getByText('+30 bodů')).toBeInTheDocument()
 })
 
 test('pruh má správnou šířku', () => {

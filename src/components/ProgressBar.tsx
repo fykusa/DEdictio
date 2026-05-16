@@ -7,13 +7,13 @@ interface Props {
 export function ProgressBar({ current, total, score }: Props) {
   const pct = total > 0 ? Math.round((current / total) * 100) : 0
   return (
-    <div className="progress-container">
-      <div className="progress-bar">
-        <div className="progress-fill" style={{ width: `${pct}%` }} />
+    <div className="progress-area">
+      <div className="progress-row">
+        <span className="progress-label">{current} / {total}</span>
+        <span className="progress-score">+{score} bodů</span>
       </div>
-      <div className="progress-text">
-        <span>{current} / {total}</span>
-        <span className="score">{score}</span>
+      <div className="progress-track">
+        <div className="progress-fill" style={{ width: `${pct}%` }} />
       </div>
     </div>
   )

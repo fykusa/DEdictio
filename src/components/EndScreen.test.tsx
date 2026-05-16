@@ -28,7 +28,7 @@ describe('EndScreen', () => {
         onChangeLang={() => {}}
       />
     )
-    fireEvent.click(screen.getByText(/Znovu/i))
+    fireEvent.click(screen.getByText(/Hrát znovu/i))
     expect(onRestart).toHaveBeenCalledTimes(1)
   })
 })

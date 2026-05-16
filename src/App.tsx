@@ -12,17 +12,18 @@ export function App() {
     LANG_PAIRS.find(p => p.id === 'de-cs') ?? LANG_PAIRS[0]
   )
 
-  if (loading || error) {
-    return <LoadingScreen error={error ?? undefined} />
-  }
-
   return (
-    <div className="app">
-      <QuizScreen
-        words={words}
-        langPair={langPair}
-        onChangeLang={setLangPair}
-      />
+    <div className="shell">
+      <div className="phone">
+        {loading || error
+          ? <LoadingScreen error={error ?? undefined} />
+          : <QuizScreen words={words} langPair={langPair} onChangeLang={setLangPair} />
+        }
+
+        <div className="home-indicator">
+          <div className="home-bar" />
+        </div>
+      </div>
     </div>
   )
 }

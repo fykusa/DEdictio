@@ -34,5 +34,5 @@ test('po výběru odpovědi se zobrazí FeedbackBar', () => {
   const buttons = screen.getAllByRole('button')
   const firstAnswerBtn = buttons.find(btn => btn.className.includes('answer-btn'))!
   fireEvent.click(firstAnswerBtn)
-  expect(screen.getByText(/dál/i)).toBeInTheDocument()
+  expect(screen.getByText(/pokračování/i)).toBeInTheDocument()
 })

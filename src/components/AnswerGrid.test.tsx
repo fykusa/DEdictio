@@ -31,18 +31,19 @@ describe('AnswerGrid', () => {
     expect(onSelect).toHaveBeenCalledWith(1)
   })
 
-  test('tlačítka jsou disabled po výběru', () => {
+  test('po výběru volá onNext při kliknutí', () => {
+    const onNext = vi.fn()
     render(
       <AnswerGrid
         options={options}
         selectedIndex={1}
         correctIndex={0}
         onSelect={() => {}}
+        onNext={onNext}
       />
     )
-    for (const btn of screen.getAllByRole('button')) {
-      expect(btn).toBeDisabled()
-    }
+    fireEvent.click(screen.getByText('dark'))
+    expect(onNext).toHaveBeenCalledTimes(1)
   })
 
   test('správná odpověď má třídu correct', () => {

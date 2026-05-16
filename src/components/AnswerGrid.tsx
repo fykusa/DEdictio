@@ -3,14 +3,10 @@ interface Props {
   selectedIndex: number | null
   correctIndex: number
   onSelect: (index: number) => void
+  onNext?: () => void
 }
 
-export function AnswerGrid({
-  options,
-  selectedIndex,
-  correctIndex,
-  onSelect,
-}: Props) {
+export function AnswerGrid({ options, selectedIndex, correctIndex, onSelect, onNext }: Props) {
   const answered = selectedIndex !== null
 
   function getClassName(i: number): string {
@@ -21,13 +17,12 @@ export function AnswerGrid({
   }
 
   return (
-    <div className="answer-grid">
+    <div className="answers-grid">
       {options.map((opt, i) => (
         <button
           key={i}
           className={getClassName(i)}
-          onClick={() => onSelect(i)}
-          disabled={answered}
+          onClick={() => answered ? onNext?.() : onSelect(i)}
         >
           {opt}
         </button>

@@ -25,9 +25,6 @@
 html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--fg); -webkit-font-smoothing: antialiased; overflow: hidden; }
 .shell { display: flex; justify-content: center; align-items: center; min-height: 100dvh; background: var(--bg); }
 .phone { width: min(430px, 100vw); height: min(932px, 100dvh); background: var(--bg); display: flex; flex-direction: column; position: relative; overflow: hidden; }
-.status-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 6px; font-size: 12px; font-weight: 600; color: var(--fg-2); flex-shrink: 0; }
-.status-bar-icons { display: flex; gap: 6px; align-items: center; }
-.status-bar-icons svg { width: 16px; height: 16px; fill: var(--fg-2); }
 .header { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px 12px; flex-shrink: 0; }
 .lang-pair { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border-mid); border-radius: var(--r-xl); padding: 6px 14px 6px 8px; cursor: pointer; user-select: none; transition: background 200ms var(--ease); }
 .lang-pair:active { background: var(--surface-2); }
@@ -90,7 +87,7 @@ html, body { height: 100%; background: var(--bg); font-family: var(--font); colo
 .lang-option-flag { font-size: 22px; line-height: 1; }
 .lang-option-info { flex: 1; }
 .lang-option-name { font-size: 15px; font-weight: 600; color: var(--fg); }
-.lang-option-sub  { font-size: 12px; color: var(--muted); margin-top: 1px; }
+.lang-option-sub  { font-size: 12px; color: var(--fg-2); margin-top: 1px; }
 .lang-check { width: 20px; height: 20px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 150ms; }
 .lang-option.active .lang-check { opacity: 1; }
 .lang-check svg { width: 11px; height: 11px; stroke: #0a1a0f; stroke-width: 2.5; fill: none; }
