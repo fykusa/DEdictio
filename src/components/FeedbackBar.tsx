@@ -11,7 +11,7 @@ export function FeedbackBar({ correct, score, onNext }: Props) {
         {correct ? `✓ Správně! +10 bodů` : `✗ Špatně`}
       </span>
       <span className="feedback-score">{score}</span>
-      <button className="btn-next" onClick={onNext}>Dál →</button>
+      <button className="next-btn" onClick={onNext}>Dál →</button>
     </div>
   )
 }
